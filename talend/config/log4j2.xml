@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_DIR">/data/talend/logs</Property>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <!-- Rolling File Appender for General Logs -->
+        <RollingFile name="RollingFile"
+                     fileName="${LOG_DIR}/talend-engine.log"
+                     filePattern="${LOG_DIR}/talend-engine-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- Rolling File Appender for Performance Logs -->
+        <RollingFile name="PerformanceLog"
+                     fileName="${LOG_DIR}/performance.log"
+                     filePattern="${LOG_DIR}/performance-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <!-- Rolling File Appender for Job Execution Logs -->
+        <RollingFile name="JobLog"
+                     fileName="${LOG_DIR}/jobs.log"
+                     filePattern="${LOG_DIR}/jobs-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- Error Log -->
+        <RollingFile name="ErrorLog"
+                     fileName="${LOG_DIR}/error.log"
+                     filePattern="${LOG_DIR}/error-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Talend Engine Loggers -->
+        <Logger name="org.talend" level="INFO" additivity="false">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Performance Logger -->
+        <Logger name="org.talend.performance" level="DEBUG" additivity="false">
+            <AppenderRef ref="PerformanceLog"/>
+        </Logger>
+
+        <!-- Job Execution Logger -->
+        <Logger name="org.talend.job" level="INFO" additivity="false">
+            <AppenderRef ref="JobLog"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Suppress verbose logging from third-party libraries -->
+        <Logger name="org.apache" level="WARN"/>
+        <Logger name="org.springframework" level="WARN"/>
+        <Logger name="com.zaxxer.hikari" level="WARN"/>
+
+        <!-- Root Logger -->
+        <Root level="INFO">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="ErrorLog"/>
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

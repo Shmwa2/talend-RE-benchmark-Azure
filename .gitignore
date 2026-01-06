@@ -1,0 +1,69 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate.d/
+outputs.json
+
+# Azure
+*.publishsettings
+*.azurePubxml
+
+# SSH Keys
+*.pem
+*.key
+id_rsa*
+*.pub
+
+# Secrets & Credentials
+*.env
+*.secret
+*credentials*
+pairing-key.txt
+
+# Logs
+*.log
+logs/
+*.out
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Benchmark Results (keep structure, ignore data)
+benchmark/results/*
+!benchmark/results/.gitkeep
+benchmark/test-data/sample-datasets/*
+!benchmark/test-data/sample-datasets/.gitkeep
+
+# Talend
+talend/jobs/*
+!talend/jobs/sample-etl-benchmark/
+talend/logs/
+
+# Temporary
+tmp/
+temp/
+*.tmp

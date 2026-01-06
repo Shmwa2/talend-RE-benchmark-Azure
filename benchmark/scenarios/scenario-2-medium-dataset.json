@@ -1,0 +1,48 @@
+{
+  "name": "medium-dataset-etl",
+  "description": "Medium dataset benchmark - 1GB CSV with 5 million records for standard performance testing",
+  "talend_job": "benchmark-etl-medium",
+  "dataset": {
+    "source": "azure-blob://test-data/medium-1gb.csv",
+    "size_mb": 1000,
+    "size_gb": 1.0,
+    "records": 5000000,
+    "format": "CSV",
+    "delimiter": ",",
+    "encoding": "UTF-8"
+  },
+  "processing": {
+    "operations": [
+      "CSV Read",
+      "Data Validation",
+      "Complex Transformation (JOIN, LOOKUP)",
+      "Data Enrichment",
+      "Aggregation (multiple metrics)",
+      "Data Quality Checks",
+      "Output to multiple formats (CSV, Parquet)"
+    ],
+    "complexity": "medium"
+  },
+  "expected": {
+    "max_execution_time_sec": 300,
+    "min_throughput_records_per_sec": 15000,
+    "target_throughput_records_per_sec": 25000
+  },
+  "resources": {
+    "recommended_vm_size": "Standard_D8s_v5",
+    "min_memory_gb": 16,
+    "min_cpu_cores": 4
+  },
+  "success_criteria": {
+    "execution_time_under_sec": 300,
+    "error_rate_below_percent": 0.05,
+    "cpu_usage_below_percent": 85,
+    "memory_usage_below_percent": 80
+  },
+  "monitoring": {
+    "collect_jvm_metrics": true,
+    "collect_gc_metrics": true,
+    "collect_disk_io": true
+  },
+  "tags": ["medium", "standard", "performance"]
+}

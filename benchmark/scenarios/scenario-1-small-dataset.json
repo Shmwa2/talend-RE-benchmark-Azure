@@ -1,0 +1,40 @@
+{
+  "name": "small-dataset-etl",
+  "description": "Small dataset benchmark - 100MB CSV with 500,000 records for development and quick testing",
+  "talend_job": "benchmark-etl-small",
+  "dataset": {
+    "source": "azure-blob://test-data/small-100mb.csv",
+    "size_mb": 100,
+    "size_gb": 0.1,
+    "records": 500000,
+    "format": "CSV",
+    "delimiter": ",",
+    "encoding": "UTF-8"
+  },
+  "processing": {
+    "operations": [
+      "CSV Read",
+      "Data Validation",
+      "Simple Transformation",
+      "Aggregation (sum, count)",
+      "CSV Write"
+    ],
+    "complexity": "low"
+  },
+  "expected": {
+    "max_execution_time_sec": 120,
+    "min_throughput_records_per_sec": 4000,
+    "target_throughput_records_per_sec": 8000
+  },
+  "resources": {
+    "recommended_vm_size": "Standard_D4s_v5",
+    "min_memory_gb": 8,
+    "min_cpu_cores": 2
+  },
+  "success_criteria": {
+    "execution_time_under_sec": 120,
+    "error_rate_below_percent": 0.1,
+    "cpu_usage_below_percent": 80
+  },
+  "tags": ["small", "quick-test", "development"]
+}

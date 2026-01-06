@@ -1,0 +1,190 @@
+// ==========================================
+// Azure Monitor KQL Queries for Talend Benchmark
+// Use these queries in Azure Log Analytics Workspace
+// ==========================================
+
+// 1. CPU Usage Over Time (Last 24 Hours)
+// Shows average CPU usage per 5-minute interval
+Perf
+| where TimeGenerated > ago(24h)
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| where InstanceName == "_Total"
+| summarize AvgCPU = avg(CounterValue) by bin(TimeGenerated, 5m)
+| render timechart
+    with (title="CPU Usage - Last 24 Hours", xtitle="Time", ytitle="CPU %")
+
+
+// 2. Memory Usage Trend
+// Displays available memory in GB over time
+Perf
+| where TimeGenerated > ago(24h)
+| where ObjectName == "Memory" and CounterName == "Available MBytes"
+| extend AvailableGB = CounterValue / 1024
+| summarize AvgMemoryGB = avg(AvailableGB) by bin(TimeGenerated, 5m)
+| render timechart
+    with (title="Available Memory - Last 24 Hours", xtitle="Time", ytitle="Memory (GB)")
+
+
+// 3. Disk I/O Performance
+// Shows disk read/write operations per second
+Perf
+| where TimeGenerated > ago(6h)
+| where ObjectName == "LogicalDisk" and InstanceName == "/data"
+| where CounterName in ("Disk Reads/sec", "Disk Writes/sec")
+| summarize AvgOps = avg(CounterValue) by CounterName, bin(TimeGenerated, 1m)
+| render timechart
+    with (title="Disk I/O - /data partition", xtitle="Time", ytitle="Operations/sec")
+
+
+// 4. Network Throughput
+// Monitors network in/out bytes
+AzureMetrics
+| where TimeGenerated > ago(12h)
+| where MetricName in ("Network In Total", "Network Out Total")
+| extend ValueMB = Total / 1024 / 1024
+| summarize TotalMB = sum(ValueMB) by MetricName, bin(TimeGenerated, 10m)
+| render timechart
+    with (title="Network Throughput", xtitle="Time", ytitle="MB")
+
+
+// 5. Top Resource-Consuming Processes
+// Identifies processes with highest CPU usage
+Perf
+| where TimeGenerated > ago(1h)
+| where ObjectName == "Process" and CounterName == "% Processor Time"
+| where InstanceName !in ("_Total", "Idle")
+| summarize AvgCPU = avg(CounterValue) by InstanceName
+| top 10 by AvgCPU desc
+| render barchart
+    with (title="Top 10 Processes by CPU Usage (Last Hour)")
+
+
+// 6. Disk Space Utilization
+// Tracks free disk space percentage
+Perf
+| where TimeGenerated > ago(24h)
+| where ObjectName == "LogicalDisk"
+| where CounterName == "% Free Space"
+| where InstanceName in ("/", "/data")
+| summarize AvgFreeSpace = avg(CounterValue) by InstanceName, bin(TimeGenerated, 1h)
+| render timechart
+    with (title="Disk Free Space %", xtitle="Time", ytitle="Free Space %")
+
+
+// 7. System Load Average
+// Monitors system load (if available via custom logs)
+Syslog
+| where TimeGenerated > ago(6h)
+| where SyslogMessage contains "load average"
+| parse SyslogMessage with * "load average: " Load1min:real ", " Load5min:real ", " Load15min:real
+| project TimeGenerated, Load1min, Load5min, Load15min
+| render timechart
+    with (title="System Load Average", xtitle="Time", ytitle="Load")
+
+
+// 8. Benchmark Execution Timeline
+// Custom log analysis for benchmark runs (if logged to Log Analytics)
+// This requires custom table setup
+// CustomLogs_BenchmarkResults_CL
+// | where TimeGenerated > ago(7d)
+// | extend ExecutionTime = todouble(ExecutionTime_s)
+// | extend Scenario = Scenario_s
+// | project TimeGenerated, Scenario, ExecutionTime, Throughput = todouble(Throughput_d)
+// | render timechart
+//     with (title="Benchmark Execution Times", xtitle="Time", ytitle="Execution Time (sec)")
+
+
+// 9. Alert-Worthy Events
+// Finds high CPU/memory events that should trigger alerts
+Perf
+| where TimeGenerated > ago(1h)
+| where (ObjectName == "Processor" and CounterName == "% Processor Time" and CounterValue > 90)
+    or (ObjectName == "Memory" and CounterName == "% Committed Bytes In Use" and CounterValue > 95)
+| summarize Count = count(), AvgValue = avg(CounterValue) by ObjectName, CounterName, bin(TimeGenerated, 5m)
+| order by TimeGenerated desc
+
+
+// 10. Performance Summary (Last Hour)
+// Aggregated performance statistics
+Perf
+| where TimeGenerated > ago(1h)
+| where ObjectName in ("Processor", "Memory", "LogicalDisk")
+| where CounterName in ("% Processor Time", "Available MBytes", "% Free Space")
+| summarize
+    AvgCPU = avgif(CounterValue, CounterName == "% Processor Time"),
+    AvgMemoryMB = avgif(CounterValue, CounterName == "Available MBytes"),
+    AvgDiskFree = avgif(CounterValue, CounterName == "% Free Space")
+| extend
+    CPUUsage = strcat(round(AvgCPU, 2), "%"),
+    AvailableMemoryGB = strcat(round(AvgMemoryMB / 1024, 2), "GB"),
+    DiskFreePercent = strcat(round(AvgDiskFree, 2), "%")
+| project CPUUsage, AvailableMemoryGB, DiskFreePercent
+
+
+// 11. Hourly Performance Heatmap
+// Creates a heatmap of CPU usage by hour of day
+Perf
+| where TimeGenerated > ago(7d)
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| where InstanceName == "_Total"
+| extend HourOfDay = hourofday(TimeGenerated)
+| summarize AvgCPU = avg(CounterValue) by HourOfDay
+| order by HourOfDay asc
+| render columnchart
+    with (title="CPU Usage by Hour of Day (Last 7 Days)", xtitle="Hour", ytitle="Avg CPU %")
+
+
+// 12. Anomaly Detection - CPU Spikes
+// Identifies unusual CPU spikes using series_decompose_anomalies
+Perf
+| where TimeGenerated > ago(24h)
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| where InstanceName == "_Total"
+| make-series CPUTimeSeries = avg(CounterValue) on TimeGenerated step 5m
+| extend (anomalies, score, baseline) = series_decompose_anomalies(CPUTimeSeries, 1.5)
+| mv-expand TimeGenerated to typeof(datetime), CPUTimeSeries to typeof(double), anomalies to typeof(long)
+| where anomalies != 0
+| project TimeGenerated, CPUTimeSeries, AnomalyType = iff(anomalies > 0, "Spike", "Dip")
+| render timechart
+    with (title="CPU Anomalies Detected", xtitle="Time", ytitle="CPU %")
+
+
+// 13. Benchmark Correlation Analysis
+// Correlate benchmark execution with resource usage
+// (Requires benchmark metadata in custom logs)
+// let BenchmarkTimes = CustomLogs_BenchmarkResults_CL
+//     | where TimeGenerated > ago(7d)
+//     | project BenchmarkStart = TimeGenerated, BenchmarkEnd = TimeGenerated + ExecutionTime_s * 1s, Scenario_s;
+// Perf
+// | where TimeGenerated > ago(7d)
+// | where ObjectName == "Processor" and CounterName == "% Processor Time"
+// | join kind=inner (BenchmarkTimes) on $left.TimeGenerated >= BenchmarkStart and $left.TimeGenerated <= BenchmarkEnd
+// | summarize AvgCPU = avg(CounterValue) by Scenario_s
+// | render barchart
+
+
+// 14. Resource Utilization Percentiles
+// Statistical distribution of resource usage
+Perf
+| where TimeGenerated > ago(24h)
+| where ObjectName in ("Processor", "Memory")
+| where CounterName in ("% Processor Time", "% Committed Bytes In Use")
+| summarize
+    p50 = percentile(CounterValue, 50),
+    p75 = percentile(CounterValue, 75),
+    p90 = percentile(CounterValue, 90),
+    p95 = percentile(CounterValue, 95),
+    p99 = percentile(CounterValue, 99)
+    by ObjectName, CounterName
+| project-reorder ObjectName, CounterName, p50, p75, p90, p95, p99
+
+
+// 15. Cost Estimation Query
+// Estimate Azure Monitor ingestion costs (approximate)
+Usage
+| where TimeGenerated > ago(30d)
+| where DataType in ("Perf", "Syslog", "AzureMetrics")
+| summarize DataVolumeMB = sum(Quantity) / 1024 by DataType
+| extend EstimatedCostUSD = DataVolumeMB * 0.0025  // Approximate $2.50/GB
+| project DataType, DataVolumeGB = round(DataVolumeMB / 1024, 2), EstimatedCostUSD = round(EstimatedCostUSD, 2)
+| order by DataVolumeGB desc

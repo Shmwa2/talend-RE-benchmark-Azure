@@ -1,0 +1,63 @@
+{
+  "name": "large-dataset-etl",
+  "description": "Large dataset benchmark - 10GB CSV with 50 million records for scalability and stress testing",
+  "talend_job": "benchmark-etl-large",
+  "dataset": {
+    "source": "azure-blob://test-data/large-10gb.csv",
+    "size_mb": 10000,
+    "size_gb": 10.0,
+    "records": 50000000,
+    "format": "CSV",
+    "delimiter": ",",
+    "encoding": "UTF-8"
+  },
+  "processing": {
+    "operations": [
+      "CSV Read (Streaming)",
+      "Parallel Processing (partitioned)",
+      "Complex Transformation (multi-table JOIN)",
+      "Data Enrichment (external API lookup)",
+      "Advanced Aggregation (windowing, ranking)",
+      "Data Quality & Deduplication",
+      "Multi-target Output (Database, Blob Storage, Data Lake)"
+    ],
+    "complexity": "high",
+    "parallel_execution": true,
+    "partitions": 8
+  },
+  "expected": {
+    "max_execution_time_sec": 1800,
+    "min_throughput_records_per_sec": 25000,
+    "target_throughput_records_per_sec": 50000
+  },
+  "resources": {
+    "recommended_vm_size": "Standard_D16s_v5",
+    "min_memory_gb": 32,
+    "min_cpu_cores": 8
+  },
+  "success_criteria": {
+    "execution_time_under_sec": 1800,
+    "error_rate_below_percent": 0.01,
+    "cpu_usage_sustained_below_percent": 90,
+    "memory_usage_sustained_below_percent": 85,
+    "no_out_of_memory_errors": true,
+    "disk_io_wait_below_percent": 20
+  },
+  "monitoring": {
+    "collect_jvm_metrics": true,
+    "collect_gc_metrics": true,
+    "collect_disk_io": true,
+    "collect_network_metrics": true,
+    "heap_dump_on_oom": true
+  },
+  "scalability_test": {
+    "enabled": true,
+    "test_vm_sizes": [
+      "Standard_D8s_v5",
+      "Standard_D16s_v5",
+      "Standard_D32s_v5"
+    ],
+    "measure_linear_scalability": true
+  },
+  "tags": ["large", "stress-test", "scalability", "production"]
+}

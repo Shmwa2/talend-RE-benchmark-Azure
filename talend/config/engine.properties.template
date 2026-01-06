@@ -1,0 +1,120 @@
+# Talend Remote Engine Configuration Template
+# Copy this file to your actual Talend Remote Engine installation
+# Location: /opt/talend/remote-engine/etc/engine.properties
+
+# ===========================================
+# Talend Cloud Connection Settings
+# ===========================================
+
+# Talend Cloud API URL (select based on your region)
+# US: https://api.us.cloud.talend.com
+# EU: https://api.eu.cloud.talend.com
+# AP: https://api.ap.cloud.talend.com
+talend.cloud.url=https://api.us.cloud.talend.com
+
+# Pre-authorized pairing key from Talend Cloud Management Console
+# Generate this key in: Management Console > Remote Engines > Add Engine
+talend.remote.engine.pre.authorized.key=YOUR_PAIRING_KEY_HERE
+
+# Remote Engine name (will appear in Management Console)
+talend.remote.engine.name=azure-benchmark-engine-dev
+
+# ===========================================
+# Workspace Configuration
+# ===========================================
+
+# Working directory for temporary files and job execution
+talend.remote.engine.workspace=/data/talend/work
+
+# Log directory
+talend.remote.engine.log.dir=/data/talend/logs
+
+# Temporary directory
+talend.remote.engine.temp.dir=/data/talend/temp
+
+# ===========================================
+# Performance Settings
+# ===========================================
+
+# Maximum number of concurrent jobs
+talend.job.max.concurrent=4
+
+# Number of threads for task execution
+talend.task.execution.threads=8
+
+# Job execution timeout (in seconds)
+talend.job.timeout=3600
+
+# Memory settings (set in systemd service or start.sh)
+# -Xms4g -Xmx16g for Standard_D8s_v5 (32GB RAM)
+
+# ===========================================
+# JVM Tuning (for start.sh or systemd service)
+# ===========================================
+# Recommended JVM flags:
+# -Xms4g
+# -Xmx16g
+# -XX:+UseG1GC
+# -XX:MaxGCPauseMillis=200
+# -XX:+HeapDumpOnOutOfMemoryError
+# -XX:HeapDumpPath=/data/talend/logs/heap-dump.hprof
+# -Djava.io.tmpdir=/data/talend/temp
+
+# ===========================================
+# Logging Configuration
+# ===========================================
+
+# Log level (DEBUG, INFO, WARN, ERROR)
+talend.log.level=INFO
+
+# Log rotation
+talend.log.max.file.size=100MB
+talend.log.max.backup.index=10
+
+# ===========================================
+# Network Configuration
+# ===========================================
+
+# HTTP proxy settings (if required)
+# talend.http.proxy.host=proxy.example.com
+# talend.http.proxy.port=8080
+# talend.http.proxy.username=
+# talend.http.proxy.password=
+
+# Connection timeout (milliseconds)
+talend.connection.timeout=30000
+
+# Read timeout (milliseconds)
+talend.read.timeout=60000
+
+# ===========================================
+# Security Settings
+# ===========================================
+
+# Enable TLS 1.2+
+talend.tls.min.version=TLSv1.2
+
+# Trust store configuration (if custom CA certificates needed)
+# talend.truststore.path=/opt/talend/truststore.jks
+# talend.truststore.password=changeit
+
+# ===========================================
+# Monitoring & Metrics
+# ===========================================
+
+# Enable JMX monitoring
+talend.jmx.enabled=true
+talend.jmx.port=9999
+
+# Metrics export interval (seconds)
+talend.metrics.export.interval=60
+
+# ===========================================
+# Benchmark-Specific Settings
+# ===========================================
+
+# Enable detailed performance logging for benchmarks
+talend.performance.logging.enabled=true
+
+# Record job execution metrics
+talend.job.metrics.enabled=true
