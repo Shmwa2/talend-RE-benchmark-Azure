@@ -1,12 +1,12 @@
 # Azure Configuration
 resource_group_name = "rg-talend-benchmark-dev"
-location            = "japaneast"  # or "eastus", "westeurope", etc.
+location            = "eastus"
 
 # Environment
 environment = "dev"
 
 # VM Configuration
-vm_size = "Standard_D8s_v5"  # Options: Standard_D4s_v5, Standard_D8s_v5, Standard_D16s_v5
+vm_size = "Standard_D4s_v3"
 
 # SSH Configuration
 admin_ssh_key_path = "~/.ssh/talend-azure-key.pub"
@@ -14,16 +14,17 @@ admin_ssh_key_path = "~/.ssh/talend-azure-key.pub"
 # Network Security
 # IMPORTANT: Change this to your public IP address for production
 # Get your IP: curl https://api.ipify.org
-allowed_ssh_source_ips = ["*"]  # Example: ["203.0.113.0/24", "198.51.100.10/32"]
+allowed_ssh_source_ips = ["*"]  # TODO: Restrict to specific IP
 
 # Monitoring
 # Leave empty to disable email alerts
-alert_email = ""  # Example: "admin@example.com"
+alert_email = ""
 
 # Tags
 tags = {
   Project     = "Talend Benchmark"
   Environment = "dev"
-  Owner       = "YourName"
+  Owner       = "your-name"  # TODO: Change to your name
   ManagedBy   = "Terraform"
+  Purpose     = "ETL Performance Testing"
 }

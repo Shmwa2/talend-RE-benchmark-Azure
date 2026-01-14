@@ -220,19 +220,26 @@ cd /home/azureuser
 
 ## Step 6: ベンチマーク実行
 
-### 6.1 テストデータ生成
-
-```bash
-# Medium サイズ (1GB) を生成
-cd ~/talend-azure-benchmark/benchmark/test-data
-python3 generate-test-data.py --size 1000 --output medium-1gb.csv
-```
-
-### 6.2 ベンチマーク実行
+### 6.1 ベンチマーク開始
 
 ```bash
 cd ~/talend-azure-benchmark
-./scripts/benchmark/run-benchmark.sh benchmark/scenarios/scenario-2-medium-dataset.json
+
+# 方法1: 手動モード（任意のジョブ対応）
+./benchmark.sh start my-test      # メトリクス収集開始
+# Talend Cloud からジョブを実行
+./benchmark.sh stop               # メトリクス収集停止、レポート生成
+
+# 方法2: 自動モード（コマンド指定）
+./benchmark.sh run "sleep 60" my-test
+```
+
+### 6.2 結果確認
+
+```bash
+./benchmark.sh list               # 過去の結果一覧
+cat results/<name>/report.md      # レポート確認
+cat results/<name>/summary.json   # JSON形式
 ```
 
 ## クリーンアップ
@@ -274,5 +281,4 @@ az vm start \
 ## 次のステップ
 
 - [アーキテクチャ](./architecture.md) - システム構成の詳細
-- [ベンチマーク方法論](./benchmark-methodology.md) - 測定方法と分析
 - [ペアリング手順](../talend/pairing/pairing-instructions.md) - Talend Cloud 接続

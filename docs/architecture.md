@@ -233,5 +233,4 @@ resource "azurerm_private_endpoint" "storage_pe" {
 ## 関連ドキュメント
 
 - [デプロイガイド](./deployment-guide.md)
-- [ベンチマーク方法論](./benchmark-methodology.md)
 - [トラブルシューティング](./troubleshooting.md)
