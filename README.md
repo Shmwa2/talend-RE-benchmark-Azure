@@ -159,7 +159,12 @@ ssh -i ~/.ssh/talend-azure-key azureuser@<PUBLIC_IP>
 # → Talend Cloud からジョブを実行
 ./benchmark.sh stop
 
-# 方法2: 自動モード（コマンド指定）
+# 方法2: 計測時間を固定（ジョブが短い場合）
+./benchmark.sh start my-test
+# → Talend Cloud からジョブを実行
+sleep 30 && ./benchmark.sh stop   # 30秒後に停止
+
+# 方法3: 自動モード（コマンド指定）
 ./benchmark.sh run "python3 my_script.py" python-test
 
 # Azure Monitor メトリクスも取得する場合
