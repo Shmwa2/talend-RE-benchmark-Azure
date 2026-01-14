@@ -30,6 +30,9 @@ terraform {
 }
 
 provider "azurerm" {
+  # Disable automatic resource provider registration due to permission constraints
+  skip_provider_registration = true
+
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -42,12 +45,27 @@ provider "azurerm" {
   }
 }
 
+# Resource Group
+resource "azurerm_resource_group" "talend_rg" {
+  name     = var.resource_group_name
+  location = var.location
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = var.resource_group_name
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  )
+}
+
 # Network Module
 module "network" {
   source = "../../modules/network"
 
-  resource_group_name     = var.resource_group_name
-  location                = var.location
+  resource_group_name     = azurerm_resource_group.talend_rg.name
+  location                = azurerm_resource_group.talend_rg.location
   environment             = var.environment
   allowed_ssh_source_ips  = var.allowed_ssh_source_ips
   tags                    = var.tags
@@ -57,8 +75,8 @@ module "network" {
 module "vm" {
   source = "../../modules/vm"
 
-  resource_group_name  = var.resource_group_name
-  location             = var.location
+  resource_group_name  = azurerm_resource_group.talend_rg.name
+  location             = azurerm_resource_group.talend_rg.location
   environment          = var.environment
   subnet_id            = module.network.subnet_id
   public_ip_id         = module.network.public_ip_id
@@ -71,8 +89,8 @@ module "vm" {
 module "storage" {
   source = "../../modules/storage"
 
-  resource_group_name = var.resource_group_name
-  location            = var.location
+  resource_group_name = azurerm_resource_group.talend_rg.name
+  location            = azurerm_resource_group.talend_rg.location
   environment         = var.environment
   tags                = var.tags
 }
@@ -81,8 +99,8 @@ module "storage" {
 module "monitoring" {
   source = "../../modules/monitoring"
 
-  resource_group_name = var.resource_group_name
-  location            = var.location
+  resource_group_name = azurerm_resource_group.talend_rg.name
+  location            = azurerm_resource_group.talend_rg.location
   environment         = var.environment
   vm_id               = module.vm.vm_id
   alert_email         = var.alert_email

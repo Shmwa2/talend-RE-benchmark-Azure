@@ -73,8 +73,8 @@ resource "azurerm_linux_virtual_machine" "talend_vm" {
   # Cloud-init configuration
   custom_data = base64encode(data.template_file.cloud_init.rendered)
 
-  # Enable encryption at host
-  encryption_at_host_enabled = true
+  # Encryption at host (requires feature registration)
+  encryption_at_host_enabled = false
 
   # Boot diagnostics
   boot_diagnostics {

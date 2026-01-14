@@ -19,7 +19,7 @@ resource "azurerm_storage_account" "talend_storage" {
   min_tls_version          = "TLS1_2"
 
   # Enable encryption
-  enable_https_traffic_only = true
+  https_traffic_only_enabled = true
 
   # Blob properties
   blob_properties {

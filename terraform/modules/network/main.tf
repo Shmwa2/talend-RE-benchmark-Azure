@@ -52,7 +52,8 @@ resource "azurerm_network_security_rule" "allow_ssh" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefixes     = var.allowed_ssh_source_ips
+  source_address_prefix       = length(var.allowed_ssh_source_ips) == 1 && var.allowed_ssh_source_ips[0] == "*" ? "0.0.0.0/0" : null
+  source_address_prefixes     = length(var.allowed_ssh_source_ips) == 1 && var.allowed_ssh_source_ips[0] == "*" ? null : var.allowed_ssh_source_ips
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.talend_nsg.name
